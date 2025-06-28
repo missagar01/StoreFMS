@@ -113,7 +113,7 @@ const routes: RouteAttributes[] = [
     {
         path: 'pending-pos',
         gateKey: 'pendingIndentsView',
-        name: 'Pending POs / Orders',
+        name: 'Pending POs',
         icon: <ListTodo size={20} />,
         element: <PendingIndents />,
         notifications: (sheets) =>
