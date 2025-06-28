@@ -169,6 +169,7 @@ export type UserPermissions = {
     storeOutApprovalView: boolean;
     storeOutApprovalAction: boolean;
     pendingIndentsView: boolean;
+    ordersView: boolean;
 };
 
 export const allPermissionKeys = [
@@ -186,4 +187,5 @@ export const allPermissionKeys = [
     "storeOutApprovalView",
     "storeOutApprovalAction",
     "pendingIndentsView",
+    "ordersView",
 ] as const;

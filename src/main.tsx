@@ -27,12 +27,14 @@ import {
     ShieldUser,
     FilePlus2,
     ListTodo,
+    Package2,
 } from 'lucide-react';
 import type { UserPermissions } from './types/sheets';
 import Administration from './components/views/Administration';
 import Loading from './components/views/Loading';
 import CreatePO from './components/views/CreatePO';
 import PendingIndents from './components/views/PendingIndents';
+import Order from './components/views/Order';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { loggedIn, loading } = useAuth();
@@ -123,6 +125,14 @@ const routes: RouteAttributes[] = [
         name: 'Create PO',
         icon: <FilePlus2 size={20} />,
         element: <CreatePO />,
+        notifications: () => 0,
+    },
+    {
+        path: 'orders',
+        gateKey: 'ordersView',
+        name: 'Orders',
+        icon: <Package2 size={20} />,
+        element: <Order />,
         notifications: () => 0,
     },
     {
