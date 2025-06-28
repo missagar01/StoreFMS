@@ -1,4 +1,4 @@
-import { ListTodo } from 'lucide-react';
+import { Package2 } from 'lucide-react';
 import Heading from '../element/Heading';
 import { useSheets } from '@/context/SheetsContext';
 import { useEffect, useState } from 'react';
@@ -78,7 +78,7 @@ export default () => {
     return (
         <div>
                 <Heading heading="Orders" subtext="View purchase orders" tabs>
-                    <ListTodo size={50} className="text-primary" />
+                    <Package2 size={50} className="text-primary" />
                 </Heading>
                 
                     <DataTable
