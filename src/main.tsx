@@ -128,9 +128,9 @@ const routes: RouteAttributes[] = [
         notifications: () => 0,
     },
     {
-        path: 'orders',
+        path: 'po-history',
         gateKey: 'ordersView',
-        name: 'Orders',
+        name: 'PO History',
         icon: <Package2 size={20} />,
         element: <Order />,
         notifications: () => 0,
