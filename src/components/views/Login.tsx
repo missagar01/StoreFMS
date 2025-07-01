@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Eye, EyeClosed } from 'lucide-react';
 import Logo from '../element/Logo';
+import { toast } from 'sonner';
 
 export default () => {
     const { login, loggedIn } = useAuth();
@@ -34,9 +35,11 @@ export default () => {
         try {
             const res = await login(values.username, values.password);
             if (!res) {
-                throw new Error();
+                toast.error("Invalid Username or Password")
             }
-        } catch {}
+        } catch {
+            toast.error("Something went wrong! Try again")
+        }
     }
 
     function onError(e: any) {
@@ -83,6 +86,7 @@ export default () => {
                                                     variant="ghost"
                                                     className="absolute right-1 top-1/2 -translate-y-1/2 hover:bg-transparent active:bg-transparent"
                                                     tabIndex={-1}
+                                                    type="button"
                                                     onMouseDown={(e) => {
                                                         e.preventDefault();
                                                         setVisible(!visible);
