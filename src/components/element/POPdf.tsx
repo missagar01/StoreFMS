@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
         height: '100%',
         fontSize: '.7rem',
         gap: '10px',
-        paddingVertical: '10px',
+        paddingBottom: '10px',
     },
     header: {
         textAlign: 'center',
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         fontWeight: 'bold',
         backgroundColor: "#cfe2f3",
-        paddingVertical: "2",
+        paddingVertical: "12px",
     },
     companyName: {
         fontSize: '1.2rem',
@@ -266,13 +266,15 @@ export default ({
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.mainContainer}>
-                    <View style={styles.header}>
-                        <Text style={styles.companyName}>{companyName}</Text>
-                        <Text>{companyAddress}</Text>
-                        <Text>Phone: +{companyPhone}</Text>
-                    </View>
+                    <View>
+                        <View style={styles.header}>
+                            <Text style={styles.companyName}>{companyName}</Text>
+                            <Text>{companyAddress}</Text>
+                            <Text>Phone: +{companyPhone}</Text>
+                        </View>
 
-                    <View style={styles.divider} />
+                        <View style={styles.divider} />
+                    </View>
 
                     <Text style={styles.purchaseOrderTitle}>Purchase Order</Text>
 
