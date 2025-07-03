@@ -83,7 +83,7 @@ export default () => {
                 .filter(
                     (sheet) =>
                         sheet.planned3 === '' &&
-                        sheet.actual3 !== '' &&
+                        sheet.actual3 === '' &&
                         sheet.vendorType === 'Three Party'
                 )
                 .map((sheet) => ({

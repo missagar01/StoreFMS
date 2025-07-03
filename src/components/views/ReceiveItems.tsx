@@ -136,7 +136,7 @@ export default () => {
                                         setSelectedIndent(indent);
                                     }}
                                 >
-                                    Receive
+                                    Store In
                                 </Button>
                             </DialogTrigger>
                         );
@@ -590,7 +590,7 @@ export default () => {
                                         name="warrantyDate"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Warranty Date</FormLabel>
+                                                <FormLabel>End of Warrany / Guarantee</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="date"
@@ -797,7 +797,7 @@ export default () => {
                                                 aria-label="Loading Spinner"
                                             />
                                         )}
-                                        Approve
+                                        Store In
                                     </Button>
                                 </DialogFooter>
                             </form>
