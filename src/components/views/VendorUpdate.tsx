@@ -13,7 +13,7 @@ import {
     DialogFooter,
     DialogClose,
 } from '../ui/dialog';
-import {  postToSheet, uploadFile } from '@/lib/fetchers';
+import { postToSheet, uploadFile } from '@/lib/fetchers';
 import { z } from 'zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,6 +91,31 @@ export default () => {
 
     // Creating table columns
     const columns: ColumnDef<VendorUpdateData>[] = [
+        ...(user.updateVendorAction
+            ? [
+                {
+                    header: 'Action',
+                    cell: ({ row }: { row: Row<VendorUpdateData> }) => {
+                        const indent = row.original;
+
+                        return (
+                            <div>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setSelectedIndent(indent);
+                                        }}
+                                    >
+                                        Update
+                                    </Button>
+                                </DialogTrigger>
+                            </div>
+                        );
+                    },
+                },
+            ]
+            : []),
         {
             accessorKey: 'indentNo',
             header: 'Indent No.',
@@ -124,31 +149,7 @@ export default () => {
                 return <Pill variant={variant}>{status}</Pill>;
             },
         },
-        ...(user.updateVendorAction
-            ? [
-                  {
-                      header: 'Action',
-                      cell: ({ row }: { row: Row<VendorUpdateData> }) => {
-                          const indent = row.original;
 
-                          return (
-                              <div>
-                                  <DialogTrigger asChild>
-                                      <Button
-                                          variant="outline"
-                                          onClick={() => {
-                                              setSelectedIndent(indent);
-                                          }}
-                                      >
-                                          Update
-                                      </Button>
-                                  </DialogTrigger>
-                              </div>
-                          );
-                      },
-                  },
-              ]
-            : []),
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [

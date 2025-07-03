@@ -121,6 +121,29 @@ export default () => {
     }, [receivedSheet]);
 
     const columns: ColumnDef<RecieveItemsData>[] = [
+        ...(user.receiveItemView
+            ? [
+                {
+                    header: 'Action',
+                    cell: ({ row }: { row: Row<RecieveItemsData> }) => {
+                        const indent = row.original;
+
+                        return (
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setSelectedIndent(indent);
+                                    }}
+                                >
+                                    Receive
+                                </Button>
+                            </DialogTrigger>
+                        );
+                    },
+                },
+            ]
+            : []),
         {
             accessorKey: 'poDate',
             header: 'PO Date',
@@ -146,29 +169,7 @@ export default () => {
                 );
             },
         },
-        ...(user.receiveItemView
-            ? [
-                  {
-                      header: 'Action',
-                      cell: ({ row }: { row: Row<RecieveItemsData> }) => {
-                          const indent = row.original;
 
-                          return (
-                              <DialogTrigger asChild>
-                                  <Button
-                                      variant="outline"
-                                      onClick={() => {
-                                          setSelectedIndent(indent);
-                                      }}
-                                  >
-                                      Receive
-                                  </Button>
-                              </DialogTrigger>
-                          );
-                      },
-                  },
-              ]
-            : []),
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [
@@ -602,8 +603,8 @@ export default () => {
                                                         value={
                                                             field.value
                                                                 ? field.value
-                                                                      .toISOString()
-                                                                      .split('T')[0]
+                                                                    .toISOString()
+                                                                    .split('T')[0]
                                                                 : ''
                                                         }
                                                         onChange={(e) =>

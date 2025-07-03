@@ -99,6 +99,32 @@ export default () => {
 
     // Creating table columns
     const columns: ColumnDef<RateApprovalData>[] = [
+        ...(user.threePartyApprovalAction
+            ? [
+                {
+                    header: 'Action',
+                    id: 'action',
+                    cell: ({ row }: { row: Row<RateApprovalData> }) => {
+                        const indent = row.original;
+
+                        return (
+                            <div>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setSelectedIndent(indent);
+                                        }}
+                                    >
+                                        Approve
+                                    </Button>
+                                </DialogTrigger>
+                            </div>
+                        );
+                    },
+                },
+            ]
+            : []),
         { accessorKey: 'indentNo', header: 'Indent No.' },
         { accessorKey: 'indenter', header: 'Indenter' },
         { accessorKey: 'department', header: 'Department' },
@@ -136,32 +162,7 @@ export default () => {
                 );
             },
         },
-        ...(user.threePartyApprovalAction
-            ? [
-                  {
-                      header: 'Action',
-                      id: 'action',
-                      cell: ({ row }: { row: Row<RateApprovalData> }) => {
-                          const indent = row.original;
 
-                          return (
-                              <div>
-                                  <DialogTrigger asChild>
-                                      <Button
-                                          variant="outline"
-                                          onClick={() => {
-                                              setSelectedIndent(indent);
-                                          }}
-                                      >
-                                          Approve
-                                      </Button>
-                                  </DialogTrigger>
-                              </div>
-                          );
-                      },
-                  },
-              ]
-            : []),
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [

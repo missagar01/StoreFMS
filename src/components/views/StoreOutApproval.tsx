@@ -113,6 +113,70 @@ export default () => {
 
     // Creating table columns
     const columns: ColumnDef<StoreOutTableData>[] = [
+        ...(user.storeOutApprovalAction
+            ? [
+                {
+                    header: 'Actions',
+                    id: 'actions',
+                    cell: ({ row }: { row: Row<StoreOutTableData> }) => {
+                        const indent = row.original;
+
+                        return (
+                            <div className="flex gap-3 justify-center">
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setSelectedIndent(indent);
+                                        }}
+                                    >
+                                        Approve
+                                    </Button>
+                                </DialogTrigger>
+                                <Button
+                                    variant="destructive"
+                                    disabled={rejecting}
+                                    onClick={async () => {
+                                        setRejecting(true);
+                                        try {
+                                            await postToSheet(
+                                                indentSheet
+                                                    .filter(
+                                                        (s) => s.indentNumber === indent.indentNo
+                                                    )
+                                                    .map((prev) => ({
+                                                        ...prev,
+                                                        actual6: new Date().toISOString(),
+                                                        issueStatus: 'Rejected',
+                                                    })),
+                                                'update'
+                                            );
+                                            toast.success(
+                                                `Updated store out approval status of ${selectedIndent?.indentNo}`
+                                            );
+                                            setTimeout(() => updateIndentSheet(), 1000);
+                                        } catch {
+                                            toast.error('Failed to update status');
+                                        } finally {
+                                            setRejecting(false);
+                                        }
+                                    }}
+                                >
+                                    {rejecting && (
+                                        <Loader
+                                            size={20}
+                                            color="white"
+                                            aria-label="Loading Spinner"
+                                        />
+                                    )}
+                                    Reject
+                                </Button>
+                            </div>
+                        );
+                    },
+                },
+            ]
+            : []),
         { accessorKey: 'indentNo', header: 'Indent No.' },
         { accessorKey: 'indenter', header: 'Indenter' },
         { accessorKey: 'department', header: 'Department' },
@@ -133,70 +197,7 @@ export default () => {
             },
         },
 
-        ...(user.storeOutApprovalAction
-            ? [
-                  {
-                      header: 'Actions',
-                      id: 'actions',
-                      cell: ({ row }: { row: Row<StoreOutTableData> }) => {
-                          const indent = row.original;
 
-                          return (
-                              <div className="flex gap-3 justify-center">
-                                  <DialogTrigger asChild>
-                                      <Button
-                                          variant="outline"
-                                          onClick={() => {
-                                              setSelectedIndent(indent);
-                                          }}
-                                      >
-                                          Approve
-                                      </Button>
-                                  </DialogTrigger>
-                                  <Button
-                                      variant="destructive"
-                                      disabled={rejecting}
-                                      onClick={async () => {
-                                          setRejecting(true);
-                                          try {
-                                              await postToSheet(
-                                                  indentSheet
-                                                      .filter(
-                                                          (s) => s.indentNumber === indent.indentNo
-                                                      )
-                                                      .map((prev) => ({
-                                                          ...prev,
-                                                          actual6: new Date().toISOString(),
-                                                          issueStatus: 'Rejected',
-                                                      })),
-                                                  'update'
-                                              );
-                                              toast.success(
-                                                  `Updated store out approval status of ${selectedIndent?.indentNo}`
-                                              );
-                                              setTimeout(() => updateIndentSheet(), 1000);
-                                          } catch {
-                                              toast.error('Failed to update status');
-                                          } finally {
-                                              setRejecting(false);
-                                          }
-                                      }}
-                                  >
-                                      {rejecting && (
-                                          <Loader
-                                              size={20}
-                                              color="white"
-                                              aria-label="Loading Spinner"
-                                          />
-                                      )}
-                                      Reject
-                                  </Button>
-                              </div>
-                          );
-                      },
-                  },
-              ]
-            : []),
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [
@@ -405,8 +406,8 @@ export default () => {
                                                     value={
                                                         field.value
                                                             ? field.value
-                                                                  .toISOString()
-                                                                  .split('T')[0]
+                                                                .toISOString()
+                                                                .split('T')[0]
                                                             : ''
                                                     }
                                                     onChange={(e) =>
