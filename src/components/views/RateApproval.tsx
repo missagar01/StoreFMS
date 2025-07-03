@@ -265,7 +265,7 @@ export default () => {
                                 className="space-y-5"
                             >
                                 <DialogHeader className="space-y-1">
-                                    <DialogTitle>Regular Vendor</DialogTitle>
+                                    <DialogTitle>Rate Approval</DialogTitle>
                                     <DialogDescription>
                                         Update vendor for{' '}
                                         <span className="font-medium">
