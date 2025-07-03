@@ -82,7 +82,7 @@ export default () => {
             indentSheet
                 .filter(
                     (sheet) =>
-                        sheet.planned3 !== '' &&
+                        sheet.planned3 === '' &&
                         sheet.actual3 !== '' &&
                         sheet.vendorType === 'Three Party'
                 )
