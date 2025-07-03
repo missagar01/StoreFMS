@@ -219,6 +219,9 @@ export default () => {
                         vendorName1: values.vendorName,
                         rate1: values.rate.toString(),
                         paymentTerm1: values.paymentTerm,
+                        approvedVendorName: values.vendorName,
+                        approvedRate: values.rate,
+                        approvedPaymentTerm: values.rate,
                     })),
                 'update'
             );
