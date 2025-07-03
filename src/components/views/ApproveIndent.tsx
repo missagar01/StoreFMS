@@ -218,9 +218,7 @@ export default () => {
 
     useEffect(() => {
         if (selectedIndent) {
-            form.reset({
-                approvedQuantity: selectedIndent.quantity,
-            });
+            form.setValue("approvedQuantity", selectedIndent.quantity)
         }
     }, [selectedIndent]);
 

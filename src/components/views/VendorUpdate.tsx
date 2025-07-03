@@ -68,7 +68,7 @@ export default () => {
                     indenter: sheet.indenterName,
                     department: sheet.department,
                     product: sheet.productName,
-                    quantity: sheet.quantity,
+                    quantity: sheet.approvedQuantity,
                     uom: sheet.uom,
                     vendorType: sheet.vendorType as VendorUpdateData['vendorType'],
                 }))

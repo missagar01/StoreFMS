@@ -9,7 +9,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
 import type { PoMasterSheet } from '@/types';
-import {  postToSheet, uploadFile } from '@/lib/fetchers';
+import { postToSheet, uploadFile } from '@/lib/fetchers';
 import { useEffect, useState } from 'react';
 import { useSheets } from '@/context/SheetsContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -542,8 +542,8 @@ export default () => {
                                                         value={
                                                             field.value
                                                                 ? field.value
-                                                                      .toISOString()
-                                                                      .split('T')[0]
+                                                                    .toISOString()
+                                                                    .split('T')[0]
                                                                 : ''
                                                         }
                                                         onChange={(e) =>
@@ -582,24 +582,22 @@ export default () => {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                {indentSheet
-                                                                    .filter(
-                                                                        (i) =>
-                                                                            i.approvedVendorName !==
-                                                                                '' &&
-                                                                            i.planned4 !== '' &&
-                                                                            i.actual4 === ''
-                                                                    )
-                                                                    .map((i, k) => (
-                                                                        <SelectItem
-                                                                            key={k}
-                                                                            value={
-                                                                                i.approvedVendorName
-                                                                            }
-                                                                        >
-                                                                            {i.approvedVendorName}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                {[
+                                                                    ...new Map(
+                                                                        indentSheet
+                                                                            .filter(
+                                                                                (i) =>
+                                                                                    i.approvedVendorName !== '' &&
+                                                                                    i.planned4 !== '' &&
+                                                                                    i.actual4 === ''
+                                                                            )
+                                                                            .map((i) => [i.approvedVendorName, i]) // Use approvedVendorName as the key
+                                                                    ).values()
+                                                                ].map((i, k) => (
+                                                                    <SelectItem key={k} value={i.approvedVendorName}>
+                                                                        {i.approvedVendorName}
+                                                                    </SelectItem>
+                                                                ))}
                                                             </SelectContent>
                                                         </Select>
                                                     </FormControl>
@@ -684,8 +682,8 @@ export default () => {
                                                         value={
                                                             field.value
                                                                 ? field.value
-                                                                      .toISOString()
-                                                                      .split('T')[0]
+                                                                    .toISOString()
+                                                                    .split('T')[0]
                                                                 : ''
                                                         }
                                                         onChange={(e) =>
@@ -731,8 +729,8 @@ export default () => {
                                                         value={
                                                             field.value
                                                                 ? field.value
-                                                                      .toISOString()
-                                                                      .split('T')[0]
+                                                                    .toISOString()
+                                                                    .split('T')[0]
                                                                 : ''
                                                         }
                                                         onChange={(e) =>
@@ -851,7 +849,7 @@ export default () => {
                                                         <TableCell>
                                                             {indent?.specifications || (
                                                                 <span className="text-muted-foreground">
-                                                                    No Description'
+                                                                    No Description
                                                                 </span>
                                                             )}
                                                         </TableCell>
