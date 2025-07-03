@@ -221,7 +221,7 @@ export default () => {
                         paymentTerm1: values.paymentTerm,
                         approvedVendorName: values.vendorName,
                         approvedRate: values.rate,
-                        approvedPaymentTerm: values.rate,
+                        approvedPaymentTerm: values.paymentTerm,
                     })),
                 'update'
             );
