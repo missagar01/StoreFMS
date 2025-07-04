@@ -45,6 +45,7 @@ interface HistoryData {
     product: string;
     quantity: number;
     uom: string;
+    rate: number;
     vendorType: 'Three Party' | 'Regular';
     date: string;
 }
@@ -84,6 +85,7 @@ export default () => {
                     product: sheet.productName,
                     quantity: sheet.quantity,
                     uom: sheet.uom,
+                    rate: sheet.approvedRate || 0,
                     vendorType: sheet.vendorType as HistoryData['vendorType'],
                 }))
         );
@@ -176,6 +178,21 @@ export default () => {
         {
             accessorKey: 'quantity',
             header: 'Quantity',
+        },
+        {
+            accessorKey: "rate",
+            header: "Rate",
+            cell: ({ row }) => {
+                const rate = row.original.rate;
+                const vendorType = row.original.vendorType;
+
+                if (!rate && vendorType === "Three Party") {
+                    return (
+                        <span className="text-muted-foreground">Not Decided</span>
+                    ) 
+                }    
+                return <>&#8377;{rate}</>;
+            },
         },
         {
             accessorKey: 'uom',
