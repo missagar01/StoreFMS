@@ -26,6 +26,7 @@ import { Tabs, TabsContent } from '../ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import Heading from '../element/Heading';
 import { formatDate } from '@/lib/utils';
+import { Input } from '../ui/input';
 
 interface RateApprovalData {
     indentNo: string;
@@ -50,6 +51,7 @@ export default () => {
     const { user } = useAuth();
 
     const [selectedIndent, setSelectedIndent] = useState<RateApprovalData | null>(null);
+    const [selectedHistory, setSelectedHistory] = useState<HistoryData | null>(null);
     const [tableData, setTableData] = useState<RateApprovalData[]>([]);
     const [historyData, setHistoryData] = useState<HistoryData[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
@@ -166,6 +168,29 @@ export default () => {
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [
+                ...(user.updateVendorAction ? [
+                    {
+                            header: 'Action',
+                            cell: ({ row }: { row: Row<HistoryData> }) => {
+                                const indent = row.original;
+        
+                                return (
+                                    <div>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setSelectedHistory(indent);
+                                                }}
+                                            >
+                                                Update
+                                            </Button>
+                                        </DialogTrigger>
+                                    </div>
+                                );
+                            },
+                        },
+                ] : []),
         { accessorKey: 'indentNo', header: 'Indent No.' },
         { accessorKey: 'indenter', header: 'Indenter' },
         { accessorKey: 'department', header: 'Department' },
@@ -223,6 +248,43 @@ export default () => {
             toast.error('Failed to update vendor');
         }
     }
+
+      const historyUpdateSchema = z.object({
+            rate: z.coerce.number(),
+        })
+    
+        const historyUpdateForm = useForm({
+            resolver: zodResolver(historyUpdateSchema),
+            defaultValues: {
+                rate: 0,
+            },
+        })
+    
+        useEffect(() => {
+            if (selectedHistory) {
+                historyUpdateForm.reset({rate: parseInt(selectedHistory.vendor[1])})
+            }
+        }, [selectedHistory])
+    
+        async function onSubmitHistoryUpdate(values: z.infer<typeof historyUpdateSchema>) {
+             try {
+                await postToSheet(
+                    indentSheet
+                        .filter((s) => s.indentNumber === selectedHistory?.indentNo)
+                        .map((prev) => ({
+                            ...prev,
+                            approvedRate: values.rate,
+                        })),
+                    'update'
+                );
+                toast.success(`Updated rate of ${selectedHistory?.indentNo}`);
+                setOpenDialog(false);
+                historyUpdateForm.reset({ rate: undefined });
+                setTimeout(() => updateIndentSheet(), 1000);
+            } catch {
+                toast.error('Failed to update vendor');
+            }
+        }
 
     function onError(e: any) {
         console.log(e);
@@ -360,6 +422,58 @@ export default () => {
                         </Form>
                     </DialogContent>
                 )}
+
+                                {selectedHistory && (
+                                        <DialogContent>
+                                            <Form {...historyUpdateForm}>
+                                                <form onSubmit={historyUpdateForm.handleSubmit(onSubmitHistoryUpdate, onError)} className="space-y-7">
+                                                    <DialogHeader className="space-y-1">
+                                                        <DialogTitle>Update Rate</DialogTitle>
+                                                        <DialogDescription>
+                                                            Update rate for{' '}
+                                                            <span className="font-medium">
+                                                                {selectedHistory.indentNo}
+                                                            </span>
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <div className="grid gap-3">
+                                                        <FormField
+                                                            control={historyUpdateForm.control}
+                                                            name="rate"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>Rate</FormLabel>
+                                                                    <FormControl>
+                                                                        <Input type="number" {...field} />
+                                                                    </FormControl>
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </div>                                    
+                
+                                                    <DialogFooter>
+                                                        <DialogClose asChild>
+                                                            <Button variant="outline">Close</Button>
+                                                        </DialogClose>
+                
+                                                        <Button
+                                                            type="submit"
+                                                            disabled={historyUpdateForm.formState.isSubmitting}
+                                                        >
+                                                            {historyUpdateForm.formState.isSubmitting && (
+                                                                <Loader
+                                                                    size={20}
+                                                                    color="white"
+                                                                    aria-label="Loading Spinner"
+                                                                />
+                                                            )}
+                                                            Update
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </form>
+                                            </Form>
+                                        </DialogContent>
+                                    )}
             </Dialog>
         </div>
     );

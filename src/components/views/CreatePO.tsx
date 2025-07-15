@@ -1,4 +1,4 @@
-import { FilePlus2, Pencil, Save, Trash } from 'lucide-react';
+import { ChevronsRightLeft, FilePlus2, Pencil, Save, Trash } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -658,7 +658,7 @@ export default () => {
                                         name="quotationNumber"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Quotaion Number</FormLabel>
+                                                <FormLabel>Quotation Number</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         className="h-9"
