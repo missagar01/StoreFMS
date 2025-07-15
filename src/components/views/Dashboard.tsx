@@ -146,7 +146,9 @@ export default function UsersTable() {
     }, [startDate, endDate, filteredProducts, filteredVendors, indentSheet, receivedSheet]);
 
     const columns: ColumnDef<InventoryTable>[] = [
-        { accessorKey: 'itemName', header: 'Item' },
+        { accessorKey: 'itemName', header: 'Item', cell: ({ row }) => {
+            return <div className='text-wrap max-w-40 text-center'>{row.original.itemName}</div>
+        }},
         { accessorKey: 'groupHead', header: 'Group Head' },
         { accessorKey: 'uom', header: 'UOM' },
         {
