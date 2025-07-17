@@ -12,8 +12,6 @@ import { ChartContainer, ChartTooltip, type ChartConfig } from '../ui/chart';
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts';
 import { useEffect, useState } from 'react';
 import { useSheets } from '@/context/SheetsContext';
-import type { ColumnDef } from '@tanstack/react-table';
-import { Pill } from '../ui/pill';
 import DataTable from '../element/DataTable';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
@@ -22,20 +20,7 @@ import { Calendar } from '../ui/calendar';
 import { ComboBox } from '../ui/combobox';
 import { analyzeData } from '@/lib/filter';
 
-interface InventoryTable {
-    itemName: string;
-    groupHead: string;
-    uom: string;
-    status: string;
-    opening: number;
-    rate: number;
-    indented: number;
-    approved: number;
-    purchaseQuantity: number;
-    outQuantity: number;
-    current: number;
-    totalPrice: number;
-}
+
 
 function CustomChartTooltipContent({
     payload,
@@ -58,8 +43,6 @@ function CustomChartTooltipContent({
 }
 export default function UsersTable() {
     const { receivedSheet, indentSheet, inventorySheet, inventoryLoading } = useSheets();
-
-    const [tableData, setTableData] = useState<InventoryTable[]>([]);
     const [chartData, setChartData] = useState<
         {
             name: string;
@@ -87,32 +70,6 @@ export default function UsersTable() {
     const [filteredProducts, setFilteredProducts] = useState<string[]>([]);
     const [allVendors, setAllVendors] = useState<string[]>([]);
     const [allProducts, setAllProducts] = useState<string[]>([]);
-
-    useEffect(() => {
-        setTableData(
-            inventorySheet.map((i) => ({
-                totalPrice: i.totalPrice,
-                approvedIndents: i.approved,
-                uom: i.uom,
-                rate: i.individualRate,
-                current: i.current,
-                status: i.colorCode,
-                indented: i.indented,
-                opening: i.opening,
-                itemName: i.itemName,
-                groupHead: i.groupHead,
-                purchaseQuantity: i.purchaseQuantity,
-                approved: i.approved,
-                outQuantity: i.outQuantity,
-            }))
-        );
-        setAlerts({
-            lowStock: inventorySheet.filter(
-                (i) => i.current !== 0 && i.colorCode.toLowerCase() === 'red'
-            ).length,
-            outOfStock: inventorySheet.filter((i) => i.current === 0).length,
-        });
-    }, [inventorySheet]);
 
     useEffect(() => {
         setAllVendors(Array.from(new Set(indentSheet.map((item) => item.approvedVendorName))));
@@ -145,50 +102,7 @@ export default function UsersTable() {
         setOut({ quantity: totalIssuedQuantity, count: issuedIndentCount });
     }, [startDate, endDate, filteredProducts, filteredVendors, indentSheet, receivedSheet]);
 
-    const columns: ColumnDef<InventoryTable>[] = [
-        { accessorKey: 'itemName', header: 'Item', cell: ({ row }) => {
-            return <div className='text-wrap max-w-40 text-center'>{row.original.itemName}</div>
-        }},
-        { accessorKey: 'groupHead', header: 'Group Head' },
-        { accessorKey: 'uom', header: 'UOM' },
-        {
-            accessorKey: 'rate',
-            header: 'Rate',
-            cell: ({ row }) => {
-                return <>&#8377;{row.original.rate}</>;
-            },
-        },
-        {
-            accessorKey: 'status',
-            header: 'Status',
-            cell: ({ row }) => {
-                const code = row.original.status.toLowerCase();
-                if (row.original.current === 0) {
-                    return <Pill variant="reject">Out of Stock</Pill>;
-                }
-                if (code === 'red') {
-                    return <Pill variant="pending">Low Stock</Pill>;
-                }
-                if (code === 'purple') {
-                    return <Pill variant="primary">Excess</Pill>;
-                }
-                return <Pill variant="secondary">In Stock</Pill>;
-            },
-        },
-        { accessorKey: 'indented', header: 'Indented' },
-        { accessorKey: 'approved', header: 'Approved' },
-        { accessorKey: 'purchaseQuantity', header: 'Purchased' },
-        { accessorKey: 'outQuantity', header: 'Issued' },
-        { accessorKey: 'current', header: 'Quantity' },
-        {
-            accessorKey: 'totalPrice',
-            header: 'Total Price',
-
-            cell: ({ row }) => {
-                return <>&#8377;{row.original.totalPrice}</>;
-            },
-        },
-    ];
+   
 
     const chartConfig = {
         quantity: {
@@ -398,19 +312,6 @@ export default function UsersTable() {
                         </CardContent>
                     </Card>
                 </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">Inventory</CardTitle>
-                        <CardContent>
-                            <DataTable
-                                data={tableData}
-                                columns={columns}
-                                dataLoading={inventoryLoading}
-                                searchFields={['itemName', 'groupHead', 'uom', 'status']}
-                            />
-                        </CardContent>
-                    </CardHeader>
-                </Card>
             </div>
         </div>
     );

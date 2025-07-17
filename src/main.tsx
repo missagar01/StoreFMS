@@ -28,6 +28,7 @@ import {
     FilePlus2,
     ListTodo,
     Package2,
+    Store,
 } from 'lucide-react';
 import type { UserPermissions } from './types/sheets';
 import Administration from './components/views/Administration';
@@ -35,6 +36,7 @@ import Loading from './components/views/Loading';
 import CreatePO from './components/views/CreatePO';
 import PendingIndents from './components/views/PendingIndents';
 import Order from './components/views/Order';
+import Inventory from './components/views/Inventory';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { loggedIn, loading } = useAuth();
@@ -63,6 +65,13 @@ const routes: RouteAttributes[] = [
         name: 'Dashboard',
         icon: <LayoutDashboard size={20} />,
         element: <Dashboard />,
+        notifications: () => 0,
+    },
+        {
+        path: '/inventory',
+        name: 'Inventory',
+        icon: <Store size={20} />,
+        element: <Inventory />,
         notifications: () => 0,
     },
     {
