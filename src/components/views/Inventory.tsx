@@ -108,6 +108,7 @@ export default () => {
                 columns={columns}
                 dataLoading={inventoryLoading}
                 searchFields={['itemName', 'groupHead', 'uom', 'status']}
+                className="h-[80dvh]"
             />
         </div>
     );

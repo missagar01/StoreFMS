@@ -71,6 +71,7 @@ export default () => {
                         columns={columns}
                         searchFields={['product', 'vendorName', 'paymentTerm', 'specifications']}
                         dataLoading={indentLoading}
+                        className="h-[80dvh]"
                     />
         </div>
     );

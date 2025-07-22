@@ -265,6 +265,7 @@ export default () => {
                         columns={columns}
                         searchFields={['name', 'username', 'permissions']}
                         dataLoading={dataLoading}
+                        className="h-[80dvh]"
                     >
                         <Button
                             className="h-full w-40"

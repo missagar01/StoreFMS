@@ -87,6 +87,7 @@ export default () => {
                 columns={historyColumns}
                 searchFields={['product', 'poNumber']}
                 dataLoading={poMasterLoading}
+                className='h-[80dvh]'
             />
         </div>
     );
