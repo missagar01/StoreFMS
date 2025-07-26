@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
     page: {
@@ -13,13 +13,26 @@ const styles = StyleSheet.create({
         paddingBottom: '10px',
     },
     header: {
-        textAlign: 'center',
-        gap: '2',
-        justifyContent: 'center',
+        flexDirection: 'row',
         alignItems: 'center',
-        fontWeight: 'bold',
-        backgroundColor: "#e80d20",
-        paddingVertical: "12px",
+        justifyContent: 'center',
+        backgroundColor: '#e80d20',
+        color: "white",
+        font: 'bold',
+        padding: 10,
+        position: 'relative',
+    },
+
+    logo: {
+        width: 60,
+        height: 60,
+        position: 'absolute',
+        left: 10,
+    },
+
+    headerTextBlock: {
+        alignItems: 'center',
+        width: '100%',
     },
     companyName: {
         fontSize: '1.2rem',
@@ -268,9 +281,11 @@ export default ({
                 <View style={styles.mainContainer}>
                     <View>
                         <View style={styles.header}>
-                            <Text style={styles.companyName}>{companyName}</Text>
-                            <Text>{companyAddress}</Text>
-                            <Text>Phone: +{companyPhone}</Text>
+                            <View style={styles.headerTextBlock}>
+                                <Text style={styles.companyName}>{companyName}</Text>
+                                <Text>{companyAddress}</Text>
+                                <Text>Phone: +{companyPhone}</Text>
+                            </View>
                         </View>
 
                         <View style={styles.divider} />
