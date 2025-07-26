@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         fontWeight: 'bold',
-        backgroundColor: "#cfe2f3",
+        backgroundColor: "#e80d20",
         paddingVertical: "12px",
     },
     companyName: {
