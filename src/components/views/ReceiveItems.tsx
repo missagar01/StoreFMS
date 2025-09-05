@@ -93,6 +93,33 @@ export default () => {
         setHistoryData(
             receivedSheet.map((r) => {
                 const indent = indentSheet.find((i) => i.indentNumber === r.indentNumber)!;
+
+                // Add null check for indent
+                if (!indent) {
+                    // Return a fallback object or skip this entry
+                    return {
+                        receiveStatus: r.receivedStatus,
+                        poNumber: r.poNumber,
+                        poDate: formatDate(new Date(r.poDate)),
+                        vendor: 'N/A', // Fallback value
+                        product: 'N/A', // Fallback value
+                        orderQuantity: 0, // Fallback value
+                        uom: 'N/A', // Fallback value
+                        photoOfProduct: r.photoOfProduct,
+                        receivedDate: formatDate(new Date(r.timestamp)),
+                        receivedQuantity: r.receivedQuantity,
+                        warrantyStatus: r.warrantyStatus,
+                        warrantyEndDate: r.endDate ? formatDate(new Date(r.endDate)) : '',
+                        billStatus: r.billStatus,
+                        billNumber: r.billNumber,
+                        billAmount: r.billAmount,
+                        photoOfBill: r.photoOfBill,
+                        anyTransport: r.anyTransportations,
+                        transporterName: r.transporterName,
+                        transportingAmount: r.transportingAmount,
+                    };
+                }
+
                 return {
                     receiveStatus: r.receivedStatus,
                     poNumber: r.poNumber,
@@ -123,26 +150,26 @@ export default () => {
     const columns: ColumnDef<RecieveItemsData>[] = [
         ...(user.receiveItemView
             ? [
-                {
-                    header: 'Action',
-                    cell: ({ row }: { row: Row<RecieveItemsData> }) => {
-                        const indent = row.original;
+                  {
+                      header: 'Action',
+                      cell: ({ row }: { row: Row<RecieveItemsData> }) => {
+                          const indent = row.original;
 
-                        return (
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setSelectedIndent(indent);
-                                    }}
-                                >
-                                    Store In
-                                </Button>
-                            </DialogTrigger>
-                        );
-                    },
-                },
-            ]
+                          return (
+                              <DialogTrigger asChild>
+                                  <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                          setSelectedIndent(indent);
+                                      }}
+                                  >
+                                      Store In
+                                  </Button>
+                              </DialogTrigger>
+                          );
+                      },
+                  },
+              ]
             : []),
         {
             accessorKey: 'poDate',
@@ -169,7 +196,6 @@ export default () => {
                 );
             },
         },
-
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [
@@ -249,7 +275,6 @@ export default () => {
         })
         .superRefine((data, ctx) => {
             if (data.status === 'Received') {
-
                 if (data.quantity === undefined) {
                     ctx.addIssue({ path: ['quantity'], code: z.ZodIssueCode.custom });
                 }
@@ -374,7 +399,14 @@ export default () => {
             console.log('here', 4);
             await postToSheet(
                 indentSheet
-                    .filter((s) => s.indentNumber === selectedIndent?.indentNumber)
+                    .filter(
+                        (s) =>
+                            s.indentNumber === selectedIndent?.indentNumber &&
+                            s.itemCode ===
+                                indentSheet.find(
+                                    (sheet) => sheet.indentNumber === selectedIndent?.indentNumber
+                                )?.itemCode
+                    )
                     .map((prev) => ({
                         ...prev,
                         actual5: new Date().toISOString(),
@@ -603,8 +635,8 @@ export default () => {
                                                         value={
                                                             field.value
                                                                 ? field.value
-                                                                    .toISOString()
-                                                                    .split('T')[0]
+                                                                      .toISOString()
+                                                                      .split('T')[0]
                                                                 : ''
                                                         }
                                                         onChange={(e) =>

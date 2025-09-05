@@ -224,26 +224,29 @@ export default () => {
     }, [selectedIndent]);
 
     async function onSubmit(values: z.infer<typeof schema>) {
-        try {
-            await postToSheet(
-                indentSheet
-                    .filter((s) => s.indentNumber === selectedIndent?.indentNo)
-                    .map((prev) => ({
-                        ...prev,
-                        vendorType: values.approval,
-                        approvedQuantity: values.approvedQuantity,
-                        actual1: new Date().toISOString(),
-                    })),
-                'update'
-            );
-            toast.success(`Updated approval status of ${selectedIndent?.indentNo}`);
-            setOpenDialog(false);
-            form.reset();
-            setTimeout(() => updateIndentSheet(), 1000);
-        } catch {
-            toast.error('Failed to approve indent');
-        }
+    try {
+        await postToSheet(
+            indentSheet
+                .filter((s) => 
+                    s.indentNumber === selectedIndent?.indentNo && 
+                    s.itemCode === indentSheet.find(sheet => sheet.indentNumber === selectedIndent?.indentNo)?.itemCode
+                )
+                .map((prev) => ({
+                    ...prev,
+                    vendorType: values.approval,
+                    approvedQuantity: values.approvedQuantity,
+                    actual1: new Date().toISOString(),
+                })),
+            'update'
+        );
+        toast.success(`Updated approval status of ${selectedIndent?.indentNo}`);
+        setOpenDialog(false);
+        form.reset();
+        setTimeout(() => updateIndentSheet(), 1000);
+    } catch {
+        toast.error('Failed to approve indent');
     }
+}
 
     function onError(e: FieldErrors<z.infer<typeof schema>>) {
         console.log(e);

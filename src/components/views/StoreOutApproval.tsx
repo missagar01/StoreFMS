@@ -64,6 +64,8 @@ export default () => {
     const [selectedIndent, setSelectedIndent] = useState<StoreOutTableData | null>(null);
     const [rejecting, setRejecting] = useState(false);
 
+    console.log('indentSheet', indentSheet);
+
     // Fetching table data
     useEffect(() => {
         setTableData(
@@ -115,67 +117,74 @@ export default () => {
     const columns: ColumnDef<StoreOutTableData>[] = [
         ...(user.storeOutApprovalAction
             ? [
-                {
-                    header: 'Actions',
-                    id: 'actions',
-                    cell: ({ row }: { row: Row<StoreOutTableData> }) => {
-                        const indent = row.original;
+                  {
+                      header: 'Actions',
+                      id: 'actions',
+                      cell: ({ row }: { row: Row<StoreOutTableData> }) => {
+                          const indent = row.original;
 
-                        return (
-                            <div className="flex gap-3 justify-center">
-                                <DialogTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            setSelectedIndent(indent);
-                                        }}
-                                    >
-                                        Approve
-                                    </Button>
-                                </DialogTrigger>
-                                <Button
-                                    variant="destructive"
-                                    disabled={rejecting}
-                                    onClick={async () => {
-                                        setRejecting(true);
-                                        try {
-                                            await postToSheet(
-                                                indentSheet
-                                                    .filter(
-                                                        (s) => s.indentNumber === indent.indentNo
-                                                    )
-                                                    .map((prev) => ({
-                                                        ...prev,
-                                                        actual6: new Date().toISOString(),
-                                                        issueStatus: 'Rejected',
-                                                    })),
-                                                'update'
-                                            );
-                                            toast.success(
-                                                `Updated store out approval status of ${selectedIndent?.indentNo}`
-                                            );
-                                            setTimeout(() => updateIndentSheet(), 1000);
-                                        } catch {
-                                            toast.error('Failed to update status');
-                                        } finally {
-                                            setRejecting(false);
-                                        }
-                                    }}
-                                >
-                                    {rejecting && (
-                                        <Loader
-                                            size={20}
-                                            color="white"
-                                            aria-label="Loading Spinner"
-                                        />
-                                    )}
-                                    Reject
-                                </Button>
-                            </div>
-                        );
-                    },
-                },
-            ]
+                          return (
+                              <div className="flex gap-3 justify-center">
+                                  <DialogTrigger asChild>
+                                      <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                              setSelectedIndent(indent);
+                                          }}
+                                      >
+                                          Approve
+                                      </Button>
+                                  </DialogTrigger>
+                                  <Button
+                                      variant="destructive"
+                                      disabled={rejecting}
+                                      onClick={async () => {
+                                          setRejecting(true);
+                                          try {
+                                              await postToSheet(
+                                                  indentSheet
+                                                      .filter(
+                                                          (s) =>
+                                                              s.indentNumber === indent.indentNo &&
+                                                              s.itemCode ===
+                                                                  indentSheet.find(
+                                                                      (sheet) =>
+                                                                          sheet.indentNumber ===
+                                                                          selectedIndent?.indentNo
+                                                                  )?.itemCode
+                                                      )
+                                                      .map((prev) => ({
+                                                          ...prev,
+                                                          actual6: new Date().toISOString(),
+                                                          issueStatus: 'Rejected',
+                                                      })),
+                                                  'update'
+                                              );
+                                              toast.success(
+                                                  `Updated store out approval status of ${selectedIndent?.indentNo}`
+                                              );
+                                              setTimeout(() => updateIndentSheet(), 1000);
+                                          } catch {
+                                              toast.error('Failed to update status');
+                                          } finally {
+                                              setRejecting(false);
+                                          }
+                                      }}
+                                  >
+                                      {rejecting && (
+                                          <Loader
+                                              size={20}
+                                              color="white"
+                                              aria-label="Loading Spinner"
+                                          />
+                                      )}
+                                      Reject
+                                  </Button>
+                              </div>
+                          );
+                      },
+                  },
+              ]
             : []),
         { accessorKey: 'indentNo', header: 'Indent No.' },
         { accessorKey: 'indenter', header: 'Indenter' },
@@ -196,8 +205,6 @@ export default () => {
                 );
             },
         },
-
-
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [
@@ -252,7 +259,14 @@ export default () => {
         try {
             await postToSheet(
                 indentSheet
-                    .filter((s) => s.indentNumber === selectedIndent?.indentNo)
+                    .filter(
+                        (s) =>
+                            s.indentNumber === selectedIndent?.indentNo &&
+                            s.itemCode ===
+                                indentSheet.find(
+                                    (sheet) => sheet.indentNumber === selectedIndent?.indentNo
+                                )?.itemCode
+                    )
                     .map((prev) => ({
                         ...prev,
                         actual6: values.approvalDate?.toISOString() ?? new Date().toISOString(),
@@ -387,7 +401,14 @@ export default () => {
                                                 <Input
                                                     type="number"
                                                     placeholder="Enter quantity to be issued"
-                                                    {...field}
+                                                    onChange={(e) => {
+                                                        // Convert string to number, use 0 if empty
+                                                        const value =
+                                                            e.target.value === ''
+                                                                ? 0
+                                                                : Number(e.target.value);
+                                                        field.onChange(value);
+                                                    }}
                                                 />
                                             </FormControl>
                                         </FormItem>
@@ -406,8 +427,8 @@ export default () => {
                                                     value={
                                                         field.value
                                                             ? field.value
-                                                                .toISOString()
-                                                                .split('T')[0]
+                                                                  .toISOString()
+                                                                  .split('T')[0]
                                                             : ''
                                                     }
                                                     onChange={(e) =>

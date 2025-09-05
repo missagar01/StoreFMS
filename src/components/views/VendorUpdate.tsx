@@ -54,11 +54,19 @@ export default () => {
     const { indentSheet, indentLoading, updateIndentSheet, masterSheet: options } = useSheets();
     const { user } = useAuth();
 
+    // console.log("masterSheet",options?.vendors);
+
     const [selectedIndent, setSelectedIndent] = useState<VendorUpdateData | null>(null);
     const [selectedHistory, setSelectedHistory] = useState<HistoryData | null>(null);
     const [historyData, setHistoryData] = useState<HistoryData[]>([]);
     const [tableData, setTableData] = useState<VendorUpdateData[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
+    const [allVendoreName, setAllVendoreName] = useState<string[]>([]);
+
+    useEffect(() => {
+        const vendorNames = options?.vendors?.map((vendor) => vendor.vendorName) || [];
+        setAllVendoreName(vendorNames);
+    }, [options]);
 
     // Fetching table data
     useEffect(() => {
@@ -96,28 +104,28 @@ export default () => {
     const columns: ColumnDef<VendorUpdateData>[] = [
         ...(user.updateVendorAction
             ? [
-                {
-                    header: 'Action',
-                    cell: ({ row }: { row: Row<VendorUpdateData> }) => {
-                        const indent = row.original;
+                  {
+                      header: 'Action',
+                      cell: ({ row }: { row: Row<VendorUpdateData> }) => {
+                          const indent = row.original;
 
-                        return (
-                            <div>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            setSelectedIndent(indent);
-                                        }}
-                                    >
-                                        Update
-                                    </Button>
-                                </DialogTrigger>
-                            </div>
-                        );
-                    },
-                },
-            ]
+                          return (
+                              <div>
+                                  <DialogTrigger asChild>
+                                      <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                              setSelectedIndent(indent);
+                                          }}
+                                      >
+                                          Update
+                                      </Button>
+                                  </DialogTrigger>
+                              </div>
+                          );
+                      },
+                  },
+              ]
             : []),
         {
             accessorKey: 'indentNo',
@@ -152,34 +160,35 @@ export default () => {
                 return <Pill variant={variant}>{status}</Pill>;
             },
         },
-
     ];
 
     const historyColumns: ColumnDef<HistoryData>[] = [
-        ...(user.updateVendorAction ? [
-            {
-                    header: 'Action',
-                    cell: ({ row }: { row: Row<HistoryData> }) => {
-                        const indent = row.original;
+        ...(user.updateVendorAction
+            ? [
+                  {
+                      header: 'Action',
+                      cell: ({ row }: { row: Row<HistoryData> }) => {
+                          const indent = row.original;
 
-                        return (
-                            <div>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        disabled={indent.vendorType === "Three Party"}
-                                        onClick={() => {
-                                            setSelectedHistory(indent);
-                                        }}
-                                    >
-                                        Update
-                                    </Button>
-                                </DialogTrigger>
-                            </div>
-                        );
-                    },
-                },
-        ] : []),
+                          return (
+                              <div>
+                                  <DialogTrigger asChild>
+                                      <Button
+                                          variant="outline"
+                                          disabled={indent.vendorType === 'Three Party'}
+                                          onClick={() => {
+                                              setSelectedHistory(indent);
+                                          }}
+                                      >
+                                          Update
+                                      </Button>
+                                  </DialogTrigger>
+                              </div>
+                          );
+                      },
+                  },
+              ]
+            : []),
         {
             accessorKey: 'date',
             header: 'Date',
@@ -205,17 +214,15 @@ export default () => {
             header: 'Quantity',
         },
         {
-            accessorKey: "rate",
-            header: "Rate",
+            accessorKey: 'rate',
+            header: 'Rate',
             cell: ({ row }) => {
                 const rate = row.original.rate;
                 const vendorType = row.original.vendorType;
 
-                if (!rate && vendorType === "Three Party") {
-                    return (
-                        <span className="text-muted-foreground">Not Decided</span>
-                    ) 
-                }    
+                if (!rate && vendorType === 'Three Party') {
+                    return <span className="text-muted-foreground">Not Decided</span>;
+                }
                 return <>&#8377;{rate}</>;
             },
         },
@@ -233,7 +240,6 @@ export default () => {
             },
         },
     ];
-
 
     // Creating Regular Vendor form
     const regularSchema = z.object({
@@ -280,29 +286,23 @@ export default () => {
     // Creating Three Party Vendor form
     const threePartySchema = z.object({
         comparisonSheet: z.instanceof(File).optional(),
-        vendors: z.array(
-            z.object({
-                vendorName: z.string().nonempty(),
-                rate: z.coerce.number().gt(0),
-                paymentTerm: z.string().nonempty(),
-            })
-        ).max(3).min(3),
+        vendors: z
+            .array(
+                z.object({
+                    vendorName: z.string().nonempty(),
+                    rate: z.coerce.number().gt(0),
+                    paymentTerm: z.string().nonempty(),
+                })
+            )
+            .max(15)
+            .min(1), // Changed from fixed 3 to min 1, max 15
     });
 
     const threePartyForm = useForm<z.infer<typeof threePartySchema>>({
         resolver: zodResolver(threePartySchema),
         defaultValues: {
             vendors: [
-                {
-                    vendorName: '',
-                    rate: 0,
-                    paymentTerm: '',
-                },
-                {
-                    vendorName: '',
-                    rate: 0,
-                    paymentTerm: '',
-                },
+                // Start with just one vendor instead of 15
                 {
                     vendorName: '',
                     rate: 0,
@@ -312,11 +312,72 @@ export default () => {
         },
     });
 
-    const { fields } = useFieldArray({
+    const { fields, append, remove } = useFieldArray({
+        // Added remove function
         control: threePartyForm.control,
         name: 'vendors',
     });
 
+    const addVendorForm = () => {
+        if (fields.length < 15) {
+            append({
+                vendorName: '',
+                rate: 0,
+                paymentTerm: '',
+            });
+        }
+    };
+
+    // Function to remove a vendor form
+    const removeVendorForm = (index: number) => {
+        if (fields.length > 1) {
+            remove(index);
+        }
+    };
+
+    // async function onSubmitThreeParty(values: z.infer<typeof threePartySchema>) {
+    //     try {
+    //         let url: string = '';
+    //         if (values.comparisonSheet) {
+    //             url = await uploadFile(
+    //                 values.comparisonSheet,
+    //                 import.meta.env.VITE_COMPARISON_SHEET_FOLDER
+    //             );
+    //         }
+
+    //         // Get the first vendor as the approved vendor for the sheet
+    //         const approvedVendor = values.vendors[0];
+
+    //         await postToSheet(
+    //             indentSheet
+    //                 .filter((s) => s.indentNumber === selectedIndent?.indentNo)
+    //                 .map((prev) => ({
+    //                     ...prev,
+    //                     actual2: new Date().toISOString(),
+    //                     vendorName1: approvedVendor.vendorName,
+    //                     rate1: approvedVendor.rate.toString(),
+    //                     paymentTerm1: approvedVendor.paymentTerm,
+    //                     approvedVendorName: approvedVendor.vendorName,
+    //                     approvedRate: approvedVendor.rate,
+    //                     approvedPaymentTerm: approvedVendor.paymentTerm,
+    //                     // Store all vendors in additional fields if needed
+    //                     comparisonSheet: url,
+    //                 })),
+    //             'update'
+    //         );
+    //         toast.success(`Updated vendors of ${selectedIndent?.indentNo}`);
+    //         setOpenDialog(false);
+    //         threePartyForm.reset();
+    //         setTimeout(() => updateIndentSheet(), 1000);
+    //     } catch {
+    //         toast.error('Failed to update vendor');
+    //     }
+    // }
+
+    // History Update form
+    
+    
+    
     async function onSubmitThreeParty(values: z.infer<typeof threePartySchema>) {
         try {
             let url: string = '';
@@ -327,25 +388,44 @@ export default () => {
                 );
             }
 
-            await postToSheet(
-                indentSheet
-                    .filter((s) => s.indentNumber === selectedIndent?.indentNo)
-                    .map((prev) => ({
+            // Get the sheet to update
+            const sheetToUpdate = indentSheet
+                .filter(
+                    (s) =>
+                        s.indentNumber === selectedIndent?.indentNo &&
+                        s.itemCode ===
+                            indentSheet.find(
+                                (sheet) => sheet.indentNumber === selectedIndent?.indentNo
+                            )?.itemCode
+                )
+                .map((prev) => {
+                    // Create the base update object
+                    const update: any = {
                         ...prev,
                         actual2: new Date().toISOString(),
-                        vendorName1: values.vendors[0].vendorName,
-                        rate1: values.vendors[0].rate.toString(),
-                        paymentTerm1: values.vendors[0].paymentTerm,
-                        vendorName2: values.vendors[1].vendorName,
-                        rate2: values.vendors[1].rate.toString(),
-                        paymentTerm2: values.vendors[1].paymentTerm,
-                        vendorName3: values.vendors[2].vendorName,
-                        rate3: values.vendors[2].rate.toString(),
-                        paymentTerm3: values.vendors[2].paymentTerm,
                         comparisonSheet: url,
-                    })),
-                'update'
-            );
+                    };
+
+                    // Map each vendor to their respective columns
+                    values.vendors.forEach((vendor, index) => {
+                        const vendorNum = index + 1;
+                        update[`vendorName${vendorNum}`] = vendor.vendorName;
+                        update[`rate${vendorNum}`] = vendor.rate.toString();
+                        update[`paymentTerm${vendorNum}`] = vendor.paymentTerm;
+                    });
+
+                    // Set the approved vendor as the first one
+                    if (values.vendors.length > 0) {
+                        const approvedVendor = values.vendors[0];
+                        update.approvedVendorName = approvedVendor.vendorName;
+                        update.approvedRate = approvedVendor.rate;
+                        update.approvedPaymentTerm = approvedVendor.paymentTerm;
+                    }
+
+                    return update;
+                });
+
+            await postToSheet(sheetToUpdate, 'update');
             toast.success(`Updated vendors of ${selectedIndent?.indentNo}`);
             setOpenDialog(false);
             threePartyForm.reset();
@@ -355,26 +435,25 @@ export default () => {
         }
     }
 
-    // History Update form
     const historyUpdateSchema = z.object({
         rate: z.coerce.number(),
-    })
+    });
 
     const historyUpdateForm = useForm({
         resolver: zodResolver(historyUpdateSchema),
         defaultValues: {
             rate: 0,
         },
-    })
+    });
 
     useEffect(() => {
         if (selectedHistory) {
-            historyUpdateForm.reset({rate: selectedHistory.rate})
+            historyUpdateForm.reset({ rate: selectedHistory.rate });
         }
-    }, [selectedHistory])
+    }, [selectedHistory]);
 
     async function onSubmitHistoryUpdate(values: z.infer<typeof historyUpdateSchema>) {
-         try {
+        try {
             await postToSheet(
                 indentSheet
                     .filter((s) => s.indentNumber === selectedHistory?.indentNo)
@@ -429,7 +508,9 @@ export default () => {
                 </Tabs>
                 {selectedIndent &&
                     (selectedIndent.vendorType === 'Three Party' ? (
-                        <DialogContent>
+                        <DialogContent className="max-h-[90vh] overflow-y-auto">
+                            {' '}
+                            {/* Added scroll for many vendors */}
                             <Form {...threePartyForm}>
                                 <form
                                     onSubmit={threePartyForm.handleSubmit(
@@ -444,6 +525,10 @@ export default () => {
                                             Update vendors for{' '}
                                             <span className="font-medium">
                                                 {selectedIndent.indentNo}
+                                            </span>
+                                            <br />
+                                            <span className="text-sm">
+                                                {fields.length} of 15 vendors added
                                             </span>
                                         </DialogDescription>
                                     </DialogHeader>
@@ -468,29 +553,69 @@ export default () => {
                                             </p>
                                         </div>
                                     </div>
-                                    <Tabs
-                                        defaultValue="0"
-                                        className="grid gap-5 p-4 border rounded-md"
-                                    >
-                                        <TabsList className="w-full p-1">
-                                            <TabsTrigger value="0">Vendor 1</TabsTrigger>
-                                            <TabsTrigger value="1">Vendor 2</TabsTrigger>
-                                            <TabsTrigger value="2">Vendor 3</TabsTrigger>
-                                        </TabsList>
+
+                                    
+
+                                    <div className="grid gap-5 p-4 border rounded-md">
                                         {fields.map((field, index) => (
-                                            <TabsContent value={`${index}`} key={field.id}>
+                                            <div
+                                                key={field.id}
+                                                className="border rounded-md p-4 relative"
+                                            >
+                                                {/* Remove button for each vendor form */}
+                                                {fields.length > 1 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="absolute top-2 right-2 h-6 w-6 p-0"
+                                                        onClick={() => removeVendorForm(index)}
+                                                    >
+                                                        ×
+                                                    </Button>
+                                                )}
+
                                                 <div className="grid gap-3">
+                                                    <h4 className="font-medium">
+                                                        Vendor {index + 1}
+                                                    </h4>
                                                     <FormField
                                                         control={threePartyForm.control}
                                                         name={`vendors.${index}.vendorName`}
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>Vendor Name</FormLabel>
+                                                                {/* <FormControl>
+                                                        <Input
+                                                            placeholder="Enter vendor name"
+                                                            {...field}
+                                                        />
+                                                    </FormControl> */}
+
                                                                 <FormControl>
-                                                                    <Input
-                                                                        placeholder="Enter vendor name"
-                                                                        {...field}
-                                                                    />
+                                                                    <>
+                                                                        <Input
+                                                                            placeholder="Type or select vendor name"
+                                                                            list={`vendor-list-${index}`}
+                                                                            {...field}
+                                                                        />
+                                                                        <datalist
+                                                                            id={`vendor-list-${index}`}
+                                                                        >
+                                                                            {allVendoreName.map(
+                                                                                (vendorName, i) => (
+                                                                                    <option
+                                                                                        key={i}
+                                                                                        value={
+                                                                                            vendorName
+                                                                                        }
+                                                                                    >
+                                                                                        {vendorName}
+                                                                                    </option>
+                                                                                )
+                                                                            )}
+                                                                        </datalist>
+                                                                    </>
                                                                 </FormControl>
                                                             </FormItem>
                                                         )}
@@ -527,9 +652,23 @@ export default () => {
                                                         )}
                                                     />
                                                 </div>
-                                            </TabsContent>
+                                            </div>
                                         ))}
-                                    </Tabs>
+                                    </div>
+
+                                    {/* Add Vendor Button */}
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="button"
+                                            onClick={addVendorForm}
+                                            disabled={fields.length >= 15}
+                                            variant="outline"
+                                            size="sm"
+                                        >
+                                            + Add Vendor
+                                        </Button>
+                                    </div>
+
                                     <FormField
                                         control={threePartyForm.control}
                                         name="comparisonSheet"
@@ -707,58 +846,63 @@ export default () => {
                         </DialogContent>
                     ))}
 
-                {selectedHistory && 
-                    selectedHistory.vendorType === "Regular" && (
-                        <DialogContent>
-                            <Form {...historyUpdateForm}>
-                                <form onSubmit={historyUpdateForm.handleSubmit(onSubmitHistoryUpdate, onError)} className="space-y-7">
-                                    <DialogHeader className="space-y-1">
-                                        <DialogTitle>Update Rate</DialogTitle>
-                                        <DialogDescription>
-                                            Update rate for{' '}
-                                            <span className="font-medium">
-                                                {selectedHistory.indentNo}
-                                            </span>
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="grid gap-3">
-                                        <FormField
-                                            control={historyUpdateForm.control}
-                                            name="rate"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Rate</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="number" {...field} />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>                                    
+                {selectedHistory && selectedHistory.vendorType === 'Regular' && (
+                    <DialogContent>
+                        <Form {...historyUpdateForm}>
+                            <form
+                                onSubmit={historyUpdateForm.handleSubmit(
+                                    onSubmitHistoryUpdate,
+                                    onError
+                                )}
+                                className="space-y-7"
+                            >
+                                <DialogHeader className="space-y-1">
+                                    <DialogTitle>Update Rate</DialogTitle>
+                                    <DialogDescription>
+                                        Update rate for{' '}
+                                        <span className="font-medium">
+                                            {selectedHistory.indentNo}
+                                        </span>
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-3">
+                                    <FormField
+                                        control={historyUpdateForm.control}
+                                        name="rate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Rate</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
 
-                                    <DialogFooter>
-                                        <DialogClose asChild>
-                                            <Button variant="outline">Close</Button>
-                                        </DialogClose>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Close</Button>
+                                    </DialogClose>
 
-                                        <Button
-                                            type="submit"
-                                            disabled={historyUpdateForm.formState.isSubmitting}
-                                        >
-                                            {historyUpdateForm.formState.isSubmitting && (
-                                                <Loader
-                                                    size={20}
-                                                    color="white"
-                                                    aria-label="Loading Spinner"
-                                                />
-                                            )}
-                                            Update
-                                        </Button>
-                                    </DialogFooter>
-                                </form>
-                            </Form>
-                        </DialogContent>
-                    )}
+                                    <Button
+                                        type="submit"
+                                        disabled={historyUpdateForm.formState.isSubmitting}
+                                    >
+                                        {historyUpdateForm.formState.isSubmitting && (
+                                            <Loader
+                                                size={20}
+                                                color="white"
+                                                aria-label="Loading Spinner"
+                                            />
+                                        )}
+                                        Update
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                )}
             </Dialog>
         </div>
     );

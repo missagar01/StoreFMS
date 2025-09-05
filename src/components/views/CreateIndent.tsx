@@ -40,7 +40,7 @@ export default () => {
                     productName: z.string().nonempty(),
                     quantity: z.coerce.number().gt(0, 'Must be greater than 0'),
                     uom: z.string().nonempty(),
-                    areaOfUse: z.string().nonempty(),
+                    itemCode: z.string().nonempty(),
                     attachment: z.instanceof(File).optional(),
                     specifications: z.string().optional(),
                 })
@@ -61,7 +61,7 @@ export default () => {
                     productName: '',
                     specifications: '',
                     quantity: 1,
-                    areaOfUse: '',
+                    itemCode: '',
                     groupHead: '',
                     department: '',
                 },
@@ -84,7 +84,7 @@ export default () => {
                     indentNumber: `SI-${String(indentSheet.length).padStart(4, '0')}`,
                     indenterName: data.indenterName,
                     department: product.department,
-                    areaOfUse: product.areaOfUse,
+                    itemCode: product.itemCode,
                     groupHead: product.groupHead,
                     productName: product.productName,
                     quantity: product.quantity,
@@ -117,7 +117,7 @@ export default () => {
                         productName: '',
                         specifications: '',
                         quantity: 1,
-                        areaOfUse: '',
+                        itemCode: '',
                         groupHead: '',
                         department: '',
                     },
@@ -211,7 +211,7 @@ export default () => {
                                         productName: '',
                                         quantity: 1,
                                         uom: '',
-                                        areaOfUse: '',
+                                        itemCode: '',
                                         // @ts-ignore
                                         priority: undefined,
                                         attachment: undefined,
@@ -317,11 +317,11 @@ export default () => {
                                             />
                                             <FormField
                                                 control={form.control}
-                                                name={`products.${index}.areaOfUse`}
+                                                name={`products.${index}.itemCode`}
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>
-                                                            Area Of Use
+                                                            Item Code
                                                             <span className="text-destructive">
                                                                 *
                                                             </span>
